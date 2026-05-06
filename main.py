@@ -3,6 +3,10 @@ from fastapi.responses import RedirectResponse
 import random
 import string
 from models import *
+from database import Base, engine
+from database_models import URLModel
+
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 urls_db = {}
