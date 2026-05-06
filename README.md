@@ -1,6 +1,6 @@
 # URL Shortener API
 
-A simple REST API to shorten long URLs and track click counts built with FastAPI.
+A REST API to convert long URLs into short, shareable links with click tracking built with FastAPI.
 
 ## Setup
 
@@ -24,41 +24,93 @@ uvicorn main:app --reload
 
 The API will be available at `http://127.0.0.1:8000`
 
-Interactive docs: `http://127.0.0.1:8000/docs`
+Interactive API documentation: `http://127.0.0.1:8000/docs`
 
-## Endpoints
+## Features
 
-| Method | Path | Description |
-|--------|------|-------------|
-| POST | `/shorten` | Create a shortened URL |
-| GET | `/s/{short_url}` | Redirect to original URL (increments clicks) |
+- Create shortened URLs from long links
+- Automatic redirect with click tracking
+- View all shortened URLs
+- Get details about specific shortened URLs
+- Delete shortened URLs
+
+## API Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/shorten` | Create a new shortened URL |
+| GET | `/s/{short_url}` | Redirect to original URL and track clicks |
 | GET | `/urls` | List all shortened URLs |
-| GET | `/urls/{short_url}` | Get details of a shortened URL |
+| GET | `/urls/{short_url}` | Get details of a specific shortened URL |
 | DELETE | `/urls/{short_url}` | Delete a shortened URL |
 
-## Creating a shortened URL
+## Examples
 
-Send a POST request to `/shorten` with:
-```json
+### Create a shortened URL
+
+```bash
+POST /shorten
+
+Request body:
 {
-  "original_url": "https://www.example.com/very/long/url/path"
+  "original_url": "https://www.github.com/some/very/long/repository/path/that/is/annoying/to/share"
 }
-```
 
 Response:
-```json
 {
-  "original_url": "https://www.example.com/very/long/url/path",
-  "short_url": "abc123",
-  "created_at": "2026-05-06T12:00:00",
+  "original_url": "https://www.github.com/some/very/long/repository/path/that/is/annoying/to/share",
+  "short_url": "aBc7Xy",
+  "created_at": "2026-05-06T12:30:45.123456",
   "clicks": 0
 }
 ```
 
-## Using the shortened URL
+### Redirect to original URL
 
-Visit `http://127.0.0.1:8000/s/abc123` in your browser — it will redirect to the original URL and increment the click counter.
+Visit `http://127.0.0.1:8000/s/aBc7Xy` in your browser — you'll be redirected to the original URL and the click count will increase.
 
-## Getting URL details
+### View all shortened URLs
 
-Check how many times a shortened URL has been clicked:
+```bash
+GET /urls
+
+Response:
+[
+  {
+    "original_url": "https://www.github.com/...",
+    "short_url": "aBc7Xy",
+    "created_at": "2026-05-06T12:30:45.123456",
+    "clicks": 5
+  },
+  ...
+]
+```
+
+### Get details of a specific shortened URL
+
+```bash
+GET /urls/aBc7Xy
+
+Response:
+{
+  "original_url": "https://www.github.com/...",
+  "short_url": "aBc7Xy",
+  "created_at": "2026-05-06T12:30:45.123456",
+  "clicks": 5
+}
+```
+
+### Delete a shortened URL
+
+```bash
+DELETE /urls/aBc7Xy
+
+Response: Returns the deleted URL object
+```
+
+## How it works
+
+- Each shortened URL gets a random 6-character code
+- The original URL is stored and retrieved when someone clicks the short link
+- Click counts are incremented each time the short URL is accessed
+- All data is stored in memory (resets when the server restarts)
